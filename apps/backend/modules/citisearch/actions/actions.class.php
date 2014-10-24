@@ -18,11 +18,37 @@ class citisearchActions extends sfActions
 
   public function executeIndex(sfWebRequest $request)
   {
+   $keyword = $request->getParameter("keyword", "");
+    $page = (int)$request->getParameter("page", 1);
+    $orderBy = $request->getParameter("orderBy", array("name_asc"));
+
+    $itemPerPage = 15;
+    
+    $this->albums = GroupePeer::getPager($page, $itemPerPage,
+        array(
+            "customerId" => $this->getUser()->getCustomerId(),
+            "keyword"    => $keyword,
+        ), $orderBy);
+    
+    $this->orderBy = $orderBy;
+    $this->keyword = $keyword;
+    
+    $this->csrfToken = $this->getUser()->getCsrfToken();
   }
 
   public function executeShow(sfWebRequest $request)
   {
 
+  }
+
+  public static function getListParams()
+  {
+    $sf_user = sfContext::getInstance()->getUser();
+    
+    return array(
+        "userId" => $sf_user->getId(),
+        "customerId" => $sf_user->getCustomerId()
+    );
   }
 
 }
