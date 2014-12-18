@@ -1,0 +1,143 @@
+<?php
+
+/**
+ * citisearch actions.
+ *
+ * @package    wikipixel
+ * @subpackage citisearch
+ * @author     Your name here
+ * @version    SVN: $Id: actions.class.php 23810 2009-11-12 11:07:44Z Kris.Wallsmith $
+ */
+class citisearchActions extends sfActions
+{
+    /**
+     * Executes index action
+     *
+     * @param sfRequest $request A request object
+     */
+    
+    public function preExecute() {
+        sfContext::getInstance()->getConfiguration()->loadHelpers("I18N");
+    }
+
+    public function executeIndex(sfWebRequest $request)
+    {
+        //if($request->getParameter("album_tag", "") == "1")
+        
+        //{
+          
+
+
+if ($request->isXmlHttpRequest())
+  {
+ // echo "Here";
+//   return new JsonResponse(array('data' => 'this is a json response'));         
+return $this->renderText(json_encode("hhhhhh"));
+
+}   
+     //}
+else{
+        $keyword = $request->getParameter("keyword", "");
+        $page = (int) $request->getParameter("page", 1);
+        $orderBy = $request->getParameter("orderBy", array("name_asc"));
+        $itemPerPage = 15;
+        $this->albums = GroupePeer::getPager($page, $itemPerPage, array(
+                    "customerId" => $this->getUser()->getCustomerId(),
+                    "keyword" => $keyword,
+                        ), $orderBy);
+        $this->tagc = TagCatPeer::doSelect(new Criteria());
+        $this->orderBy = $orderBy;
+        $this->keyword = $keyword;
+        $this->csrfToken = $this->getUser()->getCsrfToken();
+        
+        $db_host = "localhost";
+        $db_username = "root";
+        $db_password = "Mithon@8";
+        $db_name = "opendam";
+        mysql_connect($db_host, $db_username, $db_password) or die("not connected");
+        mysql_select_db($db_name);
+        $albumtag = array();
+        $retailer_tag = array();
+        $device_tag = array();
+        $message_offer = array();
+        $page_tag = array();
+        $messagetype = array();
+        $qry = " Select distinct album_tag from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $albumtag[] = $fetchdata['album_tag'];
+        }
+        $this->album_tag = $albumtag;
+        
+        $qry = " Select distinct retailer_tag from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $retailer_tag[] = $fetchdata['retailer_tag'];
+        }
+        $this->retailer_tag = $retailer_tag;
+        
+        $qry = " Select distinct device_tag from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $device_tag[] = $fetchdata['device_tag'];
+        }
+        $this->device_tag = $device_tag;
+        
+        $qry = " Select distinct payment_estimator from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $message_offer[] = $fetchdata['payment_estimator'];
+        }
+        $this->message_offer = $message_offer;
+        
+        $qry = " Select distinct page_tag from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $page_tag[] = $fetchdata['page_tag'];
+        }
+        $this->page_tag = $page_tag;
+        
+        $qry = " Select distinct type_tag from userstudy order by date_tag desc";
+        $qrydata = mysql_query($qry);
+        while ($fetchdata = mysql_fetch_array($qrydata))
+        {
+            $messagetype[] = $fetchdata['type_tag'];
+        }
+        $this->messagetype = $messagetype;
+}
+    }
+
+    public function executeShow(sfWebRequest $request) {
+        
+    }
+
+    public static function getListParams()
+    {
+        $sf_user = sfContext::getInstance()->getUser();
+        return array(
+            "userId" => $sf_user->getId(),
+            "customerId" => $sf_user->getCustomerId()
+        );
+    }
+    
+    public function album($request)
+    {
+        echo "Here";
+    }
+    
+    public function ajax(Request $request)
+    {
+        if ($request->isXMLHttpRequest())
+        {
+            return "Here...";
+            //return new JsonResponse(array('data' => 'this is a json response'));
+        }
+        //return new Response('This is not ajax!', 400);
+        return "Here111...";
+    }
+}
